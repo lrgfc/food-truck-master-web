@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.codehaus.jackson.node.ObjectNode;
 
+import com.google.code.morphia.query.Query;
 import com.google.gson.Gson;
 
 import models.*;
@@ -23,7 +24,7 @@ public class Application extends Controller {
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result getTrucks() {		 
         Gson gson = new Gson();
-        List<Trucks> groups = MorphiaObject.datastore.createQuery(Trucks.class).retrievedFields(false, "groupName").asList();
+        List<Truck> groups = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(false, "groupName").limit(10).asList();
         String json = gson.toJson(groups);
 
         return ok(json);
@@ -43,7 +44,10 @@ public class Application extends Controller {
     } 
 
     public static Result getTruckById(String truckid) {
-        return TODO;
+    	Gson gson = new Gson();
+    	Truck truck = MorphiaObject.datastore.get(Truck.class,truckid);
+        String json = gson.toJson(truck);
+    	return ok(json);
     }
 
     public static Result index() throws Exception {
