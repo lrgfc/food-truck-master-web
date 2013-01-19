@@ -8,6 +8,7 @@ import com.google.code.morphia.query.Query;
 import com.google.gson.Gson;
 
 import models.*;
+import models.Truck.Reviews;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -44,10 +45,10 @@ public class Application extends Controller {
     } 
 
     public static Result getTruckById(String truckid) {
-    	Gson gson = new Gson();
-    	Truck truck = MorphiaObject.datastore.get(Truck.class,truckid);
+        Gson gson = new Gson();
+        Truck truck = MorphiaObject.datastore.get(Truck.class,truckid);
         String json = gson.toJson(truck);
-    	return ok(json);
+        return ok(json);
     }
 
     public static Result index() throws Exception {
@@ -141,18 +142,18 @@ public class Application extends Controller {
             int star = json.findPath("star").asInt();
             String comment = json.findPath("comment").getTextValue();
             String entree = json.findPath("entree").getTextValue();
-            Trucks truck = MorphiaObject.datastore.get(Trucks.class, truckid);
+            Truck truck = MorphiaObject.datastore.get(Truck.class, truckid);
             truck.average_star = (truck.average_star * truck.review_count + star) 
                     / (truck.review_count + 1);
             truck.review_count += 1;
-           
-//            MorphiaObject.datastore.update(truckid, truck);
-            
+
+            //            MorphiaObject.datastore.update(truckid, truck);
+
             return ok();
         }
-        
+
     }
-    
+
     private static Result authFailed() {
         ObjectNode failed = Json.newObject();
         failed.put("error", "authentication failed");
