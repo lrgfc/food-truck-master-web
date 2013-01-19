@@ -54,7 +54,7 @@ public class Application extends Controller {
     public static Result getTopTrucks(String rank) {   
         Gson gson = new Gson();
         List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
-                        .order("averageStar").retrievedFields(false, "reviews").limit(Integer.parseInt(rank)).asList();
+                        .order("-averageStar").retrievedFields(false, "reviews").limit(Integer.parseInt(rank)).asList();
         String json = gson.toJson(truck);
         return ok(json);
     } 
