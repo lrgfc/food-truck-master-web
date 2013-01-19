@@ -1,6 +1,6 @@
 package models;
 
-import models.Trucks.Reviews;
+import models.Truck.Reviews;
 import play.data.validation.Constraints.Required;
 
 import com.google.code.morphia.annotations.*;

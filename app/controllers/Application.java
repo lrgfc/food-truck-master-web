@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.codehaus.jackson.node.ObjectNode;
 
 import com.google.code.morphia.query.Query;
@@ -45,7 +46,7 @@ public class Application extends Controller {
 
     public static Result getTruckById(String truckid) {
     	Gson gson = new Gson();
-    	Truck truck = MorphiaObject.datastore.get(Truck.class,truckid);
+    	Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id").equal(new ObjectId (truckid)).get();
         String json = gson.toJson(truck);
     	return ok(json);
     }
