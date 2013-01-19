@@ -47,7 +47,7 @@ public class Application extends Controller {
 
     public static Result getTruckById(String truckid) {
         Gson gson = new Gson();
-    	Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id").equal(new ObjectId (truckid)).get();
+        Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id").equal(new ObjectId (truckid)).get();
         String json = gson.toJson(truck);
         return ok(json);
     }
@@ -118,11 +118,12 @@ public class Application extends Controller {
 
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result reviewFb(String truckid, String fid) {
-        if (authenticated(fid)) {
-            return Application.review(truckid);
-        } else {
-            return Application.authFailed();
-        }
+//        if (authenticated(fid)) {
+//            return Application.review(truckid);
+//        } else {
+//            return Application.authFailed();
+//        }
+        return Application.review(truckid);     // TODO: delete
     }
 
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
@@ -139,21 +140,25 @@ public class Application extends Controller {
         if (json == null) {
             return Application.reviewFailed(truckid);
         } else {
-            String fid = json.findPath("fid").getTextValue();
-            String name = json.findPath("name").getTextValue();
+            // construct truckid
+            ObjectId tid = new ObjectId(truckid);
+            // get new average_star and review_count 
+            Truck truck = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "average_star", "review_count").field("_id").equal(tid).get();
             int star = json.findPath("star").asInt();
-            String comment = json.findPath("comment").getTextValue();
-            String entree = json.findPath("entree").getTextValue();
-            Truck truck = MorphiaObject.datastore.get(Truck.class, truckid);
             double average_star = (truck.average_star * truck.review_count + star) 
                     / (truck.review_count + 1);
+            // construct new review
+            String fid = json.findPath("fid").getTextValue();
+            String name = json.findPath("name").getTextValue();
+            String comment = json.findPath("comment").getTextValue();
+            String entree = json.findPath("entree").getTextValue();
             Truck.Review review = truck.new Review(fid, name, star, comment, entree);
-            truck.reviews.add(review);
-
+            // create update query and operation
+            Query<Truck> updateQuery = MorphiaObject.datastore.createQuery(Truck.class).field("_id").equal(tid);
             UpdateOperations<Truck> ops = MorphiaObject.datastore.
-                    createUpdateOperations(Truck.class).set("average_star", average_star).inc("review_count");
-//            datastore.update(updateQuery, ops);
-            
+                    createUpdateOperations(Truck.class).set("average_star", average_star).inc("review_count").add("reviews", review);
+            // update truck
+            MorphiaObject.datastore.update(updateQuery, ops);            
             return ok();
         }
 
