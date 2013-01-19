@@ -42,6 +42,10 @@ public class Application extends Controller {
         return TODO;
     } 
     
+    public static Result getTruckById(String truckid) {
+        return TODO;
+    }
+    
     public static Result index() throws Exception {
         // redirect to the "group Result
         return redirect(routes.Application.group());

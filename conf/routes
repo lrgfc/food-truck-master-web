@@ -10,6 +10,7 @@ GET     /trucks                     controllers.Application.getTrucks()
 GET     /trucks/:genre              controllers.Application.getTrucksByType(genre: String)
 GET     /trucks/nearby/:lon/:lat    controllers.Application.getNearByTrucks(lon: String, lat: String)
 GET     /trucks/top/:rank           controllers.Application.getTopTrucks(rank: String)
+GET     /truck/:truckid             controllers.Application.getTruckById(truckid: String)
 
 # checkins
 POST	/checkin/:fid				controllers.Application.checkinFb(fid: String)
