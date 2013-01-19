@@ -13,14 +13,14 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
-
+import play.mvc.*;
 import play.libs.Json;
 
 public class Application extends Controller {
 
     static Form<Group> groupForm = form(Group.class);
 
-    //	 @BodyParser.Of(Json.class)
+    @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result getTrucks() {		 
         Gson gson = new Gson();
         List<Group> groups = MorphiaObject.datastore.createQuery(Group.class).retrievedFields(false, "groupName").asList();
@@ -29,14 +29,6 @@ public class Application extends Controller {
         return ok(json);
     }
 
-    // "name": String, 
-    //        "location": [Number, Number],
-    //        "address": String,
-    //        "phone": String,
-    //        "genre": String,
-    //        “photo”: String,
-    //        “average”: Number,
-    //        “count”: Number,
 
     public static Result getTrucksByType(String genre) {           
         return TODO;
