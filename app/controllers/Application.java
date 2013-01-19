@@ -157,8 +157,8 @@ public class Application extends Controller {
             // get new average_star and review_count 
             Truck truck = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "average_star", "review_count").field("_id").equal(tid).get();
             int star = json.findPath("star").asInt();
-            double average_star = (truck.average_star * truck.review_count + star) 
-                    / (truck.review_count + 1);
+            double average_star = (truck.averageStar * truck.reviewCount + star) 
+                    / (truck.reviewCount + 1);
             // construct new review
             String fid = json.findPath("fid").getTextValue();
             String name = json.findPath("name").getTextValue();

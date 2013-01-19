@@ -27,8 +27,8 @@ public class Truck {
 	public String phone;
 	public String genre;
 	public String photo;
-	public double average_star;
-	public int review_count;
+	public double averageStar;
+	public int reviewCount;
 	@Embedded
 	public List<Review> reviews = new ArrayList<Review>();
 	
