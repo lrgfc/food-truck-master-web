@@ -18,11 +18,17 @@ import controllers.MorphiaObject;
 public class Group {
 
 	@Id
-	public ObjectId id;
+	public String id;
 	@Required
 	public String groupName;
 	@play.data.format.Formats.DateTime(pattern = "yyyy-MM-dd")
 	public Date date;
+
+	// public Group(ObjectId i, String gn, Date date) {
+	// 	id = i;
+	// 	groupName = gn;
+	// 	date = date;
+	// }
 
 	public static List<Group> all() {
 		if (MorphiaObject.datastore != null) {

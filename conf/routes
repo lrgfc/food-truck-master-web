@@ -5,6 +5,8 @@
 # Home page
 GET     /                           controllers.Application.index()
 
+GET     /trucks                  controllers.Application.getTrucks()
+
 GET     /groups                     controllers.Application.group()
 POST    /groups                     controllers.Application.newGroup()
 POST    /groups/:id/delete          controllers.Application.deleteGroup(id: String)
