@@ -9,13 +9,14 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.data.validation.Constraints.Required;
 
-import com.google.code.morphia.annotations.Entity;
-import com.google.code.morphia.annotations.Id;
+
+import com.google.code.morphia.annotations.*;
+
 
 import controllers.MorphiaObject;
 
 @Entity("trucks")
-public class Trucks {
+public class Truck {
 
 	@Id
 	public String id;
@@ -28,7 +29,16 @@ public class Trucks {
 	public String photo;
 	public double average_star;
 	public int review_count;
+	@Embedded
 	public Reviews[] reviews;
-	class Reviews {}
+	
+	@Embedded
+	class Reviews {
+		public String fid;
+		public String name;
+		public int star;
+		public String comments;
+		public String entree;
+	}
 	
 }
