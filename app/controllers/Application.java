@@ -38,6 +38,18 @@ public class Application extends Controller {
     //        “average”: Number,
     //        “count”: Number,
 
+    public static Result getTrucksByType(String genre) {           
+        return TODO;
+    }
+
+    public static Result getNearByTrucks(String lon, String lat) {           
+        return TODO;
+    }
+    
+    public static Result getTopTrucks(String rank) {           
+        return TODO;
+    } 
+    
     public static Result index() throws Exception {
         // redirect to the "group Result
         return redirect(routes.Application.group());

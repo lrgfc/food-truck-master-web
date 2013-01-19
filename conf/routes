@@ -5,14 +5,11 @@
 # Home page
 GET     /                           controllers.Application.index()
 
-GET     /trucks                  controllers.Application.getTrucks()
-
-GET     /groups                     controllers.Application.group()
-POST    /groups                     controllers.Application.newGroup()
-POST    /groups/:id/delete          controllers.Application.deleteGroup(id: String)
-
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+# Trucks
+GET     /trucks                     controllers.Application.getTrucks()
+GET     /trucks/:genre              controllers.Application.getTrucksByType(genre: String)
+GET     /trucks/nearby/:lon/:lat    controllers.Application.getNearByTrucks(lon: String, lat: String)
+GET     /trucks/top/:rank           controllers.Application.getTopTrucks(rank: String)
 
 # checkins
 POST	/checkin/:fid				controllers.Application.checkinFb(fid: String)
@@ -23,3 +20,11 @@ POST    /checkin                    controllers.Application.checkinFailed()
 POST    /review/:truckid/:fid       controllers.Application.reviewFb(truckid: String, fid: String)
 POST    /review/:truckid/:usr/:pwd  controllers.Application.reviewFm(truckid: String, usr: String, pwd: String)
 POST    /review/:truckid            controllers.Application.reviewFailed(truckid: String)
+
+
+GET     /groups                     controllers.Application.group()
+POST    /groups                     controllers.Application.newGroup()
+POST    /groups/:id/delete          controllers.Application.deleteGroup(id: String)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
