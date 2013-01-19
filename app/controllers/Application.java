@@ -93,27 +93,29 @@ public class Application extends Controller {
     }
 
     public static Result checkinFailed() {
-        ObjectNode failed = Json.newObject();
-        failed.put("error", "authentication failed");
-        return badRequest(failed);
+        return authFailed();
     }
 
     public static Result reviewFailed(String str) {
-        ObjectNode failed = Json.newObject();
-        failed.put("error", "authentication failed");
-        return badRequest(failed);
+        return authFailed();
     }
-    
+
     public static Result reviewFb(String truckid, String fid) {
-        
+
         return TODO;
     }
 
     public static Result reviewFm(String truckid, String usr, String pwd) {
-        
+
         return TODO;
     }
-    
+
+    private static Result authFailed() {
+        ObjectNode failed = Json.newObject();
+        failed.put("error", "authentication failed");
+        return badRequest(failed);
+    }
+
     private static boolean authenticated(String fid) {
         return true;
     }
