@@ -42,13 +42,13 @@ public class Application extends Controller {
     }
     
     public static Result getNearByTrucks(String lon, String lat) {
-            Gson gson = new Gson();
-            Truck truck = MorphiaObject.datastore.find(Truck.class)
-                            .field("location")
-                            .near(Double.parseDouble(lon), Double.parseDouble(lat))
-                            .get();
-            String json = gson.toJson(truck);
-            return ok(json);
+        Gson gson = new Gson();
+        List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
+                        .field("location")
+                        .near(Double.parseDouble(lon), Double.parseDouble(lat), 0.0001)
+                        .limit(5).asList();
+        String json = gson.toJson(truck);
+        return ok(json);
     }
 
     public static Result getTopTrucks(String rank) {           
