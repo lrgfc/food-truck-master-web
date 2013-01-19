@@ -6,10 +6,10 @@ import org.bson.types.ObjectId;
 import org.codehaus.jackson.node.ObjectNode;
 
 import com.google.code.morphia.query.Query;
+import com.google.code.morphia.query.UpdateOperations;
 import com.google.gson.Gson;
 
 import models.*;
-import models.Truck.Reviews;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -140,16 +140,20 @@ public class Application extends Controller {
             return Application.reviewFailed(truckid);
         } else {
             String fid = json.findPath("fid").getTextValue();
+            String name = json.findPath("name").getTextValue();
             int star = json.findPath("star").asInt();
             String comment = json.findPath("comment").getTextValue();
             String entree = json.findPath("entree").getTextValue();
             Truck truck = MorphiaObject.datastore.get(Truck.class, truckid);
-            truck.average_star = (truck.average_star * truck.review_count + star) 
+            double average_star = (truck.average_star * truck.review_count + star) 
                     / (truck.review_count + 1);
-            truck.review_count += 1;
+            Truck.Review review = truck.new Review(fid, name, star, comment, entree);
+            truck.reviews.add(review);
 
-            //            MorphiaObject.datastore.update(truckid, truck);
-
+            UpdateOperations<Truck> ops = MorphiaObject.datastore.
+                    createUpdateOperations(Truck.class).set("average_star", average_star).inc("review_count");
+//            datastore.update(updateQuery, ops);
+            
             return ok();
         }
 

@@ -1,6 +1,8 @@
 package models;
 
-import models.Truck.Reviews;
+import java.util.ArrayList;
+import java.util.List;
+
 import play.data.validation.Constraints.Required;
 
 import com.google.code.morphia.annotations.*;
@@ -18,7 +20,7 @@ public class User {
     @Required
     public String pwd;
     @Embedded
-    public Checkin[] checkins;
+    public List<Checkin> checkins = new ArrayList<Checkin>();
     
     @Embedded
     public class Checkin {

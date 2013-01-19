@@ -30,10 +30,18 @@ public class Truck {
 	public double average_star;
 	public int review_count;
 	@Embedded
-	public Reviews[] reviews;
+	public List<Review> reviews = new ArrayList<Review>();
 	
 	@Embedded
-	class Reviews {
+	public class Review {
+	        public Review (String fid, String name, 
+	                int star, String comments, String entree){
+	            this.fid = fid;
+	            this.name = name;
+	            this.star = star;
+	            this.comments = comments;
+	            this.entree = entree;
+	        }
 		public String fid;
 		public String name;
 		public int star;
