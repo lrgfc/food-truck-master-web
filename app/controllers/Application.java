@@ -33,23 +33,35 @@ public class Application extends Controller {
     }
 
 
-    public static Result getTrucksByType(String genre) {           
-        return TODO;
+        public static Result getTrucksByType(String genre) {
+            Gson gson = new Gson();
+            List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
+                            .field("genre").equal(genre).asList();
+            String json = gson.toJson(truck);
+            return ok(json);
     }
-
-    public static Result getNearByTrucks(String lon, String lat) {           
-        return TODO;
+    
+    public static Result getNearByTrucks(String lon, String lat) {
+            Gson gson = new Gson();
+            Truck truck = MorphiaObject.datastore.find(Truck.class)
+                            .field("location")
+                            .near(Double.parseDouble(lon), Double.parseDouble(lat))
+                            .get();
+            String json = gson.toJson(truck);
+            return ok(json);
     }
 
     public static Result getTopTrucks(String rank) {           
         return TODO;
     } 
 
+
     public static Result getTruckById(String truckid) {
-        Gson gson = new Gson();
-        Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id").equal(new ObjectId (truckid)).get();
-        String json = gson.toJson(truck);
-        return ok(json);
+            Gson gson = new Gson();
+            Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id")
+                            .equal(new ObjectId(truckid)).get();
+            String json = gson.toJson(truck);
+            return ok(json);
     }
 
     public static Result index() throws Exception {
