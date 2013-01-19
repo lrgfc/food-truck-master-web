@@ -1,6 +1,6 @@
 package models;
 
-import models.Trucks.Reviews;
+import models.Truck.Reviews;
 import play.data.validation.Constraints.Required;
 
 import com.google.code.morphia.annotations.*;
@@ -21,7 +21,7 @@ public class User {
     public Checkin[] checkins;
     
     @Embedded
-    class Checkin {
+    public class Checkin {
         public String time;
         public String location;
         public String truck;    // truck's id
