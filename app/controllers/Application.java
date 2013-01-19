@@ -98,6 +98,22 @@ public class Application extends Controller {
         return badRequest(failed);
     }
 
+    public static Result reviewFailed(String str) {
+        ObjectNode failed = Json.newObject();
+        failed.put("error", "authentication failed");
+        return badRequest(failed);
+    }
+    
+    public static Result reviewFb(String truckid, String fid) {
+        
+        return TODO;
+    }
+
+    public static Result reviewFm(String truckid, String usr, String pwd) {
+        
+        return TODO;
+    }
+    
     private static boolean authenticated(String fid) {
         return true;
     }
