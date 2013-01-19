@@ -70,19 +70,21 @@ public class Application extends Controller {
         return redirect(routes.Application.group());
     }
 
+    @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result checkinFb(String fid) {
         if (authenticated(fid)) {
             return Application.checkin();
         } else {
-            return Application.checkinFailed();
+            return Application.authFailed();
         }
     }
 
+    @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result checkinFm(String usr, String pwd) {
         if (authenticated(usr, pwd)) {
             return Application.checkin();
         } else {
-            return Application.checkinFailed();
+            return Application.authFailed();
         }
     }
 
@@ -108,16 +110,45 @@ public class Application extends Controller {
         return authFailed();
     }
 
+    @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result reviewFb(String truckid, String fid) {
-
-        return TODO;
+        if (authenticated(fid)) {
+            return Application.review(truckid);
+        } else {
+            return Application.authFailed();
+        }
     }
 
+    @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result reviewFm(String truckid, String usr, String pwd) {
-
-        return TODO;
+        if (authenticated(usr, pwd)) {
+            return Application.review(truckid);
+        } else {
+            return Application.authFailed();
+        }
     }
 
+    private static Result review(String truckid) {
+        JsonNode json = request().body().asJson();
+        if (json == null) {
+            return Application.reviewFailed(truckid);
+        } else {
+            String fid = json.findPath("fid").getTextValue();
+            int star = json.findPath("star").asInt();
+            String comment = json.findPath("comment").getTextValue();
+            String entree = json.findPath("entree").getTextValue();
+            Trucks truck = MorphiaObject.datastore.get(Trucks.class, truckid);
+            truck.average_star = (truck.average_star * truck.review_count + star) 
+                    / (truck.review_count + 1);
+            truck.review_count += 1;
+           
+//            MorphiaObject.datastore.update(truckid, truck);
+            
+            return ok();
+        }
+        
+    }
+    
     private static Result authFailed() {
         ObjectNode failed = Json.newObject();
         failed.put("error", "authentication failed");
