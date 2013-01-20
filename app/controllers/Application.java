@@ -26,7 +26,7 @@ public class Application extends Controller {
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result getTrucks() {		 
         Gson gson = new Gson();
-        List<Truck> groups = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(false, "groupName").limit(10).asList();
+        List<Truck> groups = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(false, "reviews").limit(10).asList();
         String json = gson.toJson(groups);
 
         return ok(json);
@@ -36,7 +36,7 @@ public class Application extends Controller {
         public static Result getTrucksByType(String genre) {
             Gson gson = new Gson();
             List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
-                            .field("genre").equal(genre).asList();
+                            .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
             String json = gson.toJson(truck);
             return ok(json);
     }
@@ -46,13 +46,17 @@ public class Application extends Controller {
         List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
                         .field("location")
                         .near(Double.parseDouble(lon), Double.parseDouble(lat), 0.0001)
-                        .limit(5).asList();
+                        .limit(5).retrievedFields(false, "reviews").asList();
         String json = gson.toJson(truck);
         return ok(json);
     }
 
-    public static Result getTopTrucks(String rank) {           
-        return TODO;
+    public static Result getTopTrucks(String rank) {   
+        Gson gson = new Gson();
+        List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
+                        .order("-averageStar").retrievedFields(false, "reviews").limit(Integer.parseInt(rank)).asList();
+        String json = gson.toJson(truck);
+        return ok(json);
     } 
 
 
