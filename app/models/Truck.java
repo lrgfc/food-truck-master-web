@@ -24,6 +24,8 @@ public class Truck {
 	public int reviewCount;
 	@Embedded
 	public List<Review> reviews = new ArrayList<Review>();
+	@Embedded
+	public List<Entree> entries = new ArrayList<Entree>();
 	
 	@Embedded
 	public static class Review {
@@ -41,6 +43,16 @@ public class Truck {
 		public String name;
 		public int star;
 		public String comments;
+	}
+	
+	@Embedded
+	public static class Entree {
+		public Entree(){};
+		public String category;
+		public String dish_name;
+		public String price;
+		public String comments;
+		
 	}
 	
 }
