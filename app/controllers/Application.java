@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.node.ObjectNode;
@@ -35,8 +36,10 @@ public class Application extends Controller {
 
         public static Result getTrucksByType(String genre) {
             Gson gson = new Gson();
-            List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
-                            .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
+            Pattern regexp = Pattern.compile(genre);
+            List<Truck> truck = MorphiaObject.datastore.createQuery(Truck.class).filter("genre", regexp).retrievedFields(false, "reviews").asList();
+//            List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
+//                            .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
             String json = gson.toJson(truck);
             return ok(json);
     }
