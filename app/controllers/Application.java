@@ -15,9 +15,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
 import play.mvc.*;
-import play.libs.Json;
 
 public class Application extends Controller {
 
@@ -33,20 +31,20 @@ public class Application extends Controller {
     }
 
 
-        public static Result getTrucksByType(String genre) {
-            Gson gson = new Gson();
-            List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
-                            .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
-            String json = gson.toJson(truck);
-            return ok(json);
+    public static Result getTrucksByType(String genre) {
+        Gson gson = new Gson();
+        List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
+                .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
+        String json = gson.toJson(truck);
+        return ok(json);
     }
-    
+
     public static Result getNearByTrucks(String lon, String lat) {
         Gson gson = new Gson();
         List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
-                        .field("location")
-                        .near(Double.parseDouble(lon), Double.parseDouble(lat), 0.0001)
-                        .limit(5).retrievedFields(false, "reviews").asList();
+                .field("location")
+                .near(Double.parseDouble(lon), Double.parseDouble(lat), 0.0001)
+                .limit(5).retrievedFields(false, "reviews").asList();
         String json = gson.toJson(truck);
         return ok(json);
     }
@@ -54,18 +52,18 @@ public class Application extends Controller {
     public static Result getTopTrucks(String rank) {   
         Gson gson = new Gson();
         List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
-                        .order("-averageStar").retrievedFields(false, "reviews").limit(Integer.parseInt(rank)).asList();
+                .order("-averageStar").retrievedFields(false, "reviews").limit(Integer.parseInt(rank)).asList();
         String json = gson.toJson(truck);
         return ok(json);
     } 
 
 
     public static Result getTruckById(String truckid) {
-            Gson gson = new Gson();
-            Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id")
-                            .equal(new ObjectId(truckid)).get();
-            String json = gson.toJson(truck);
-            return ok(json);
+        Gson gson = new Gson();
+        Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id")
+                .equal(new ObjectId(truckid)).get();
+        String json = gson.toJson(truck);
+        return ok(json);
     }
 
     public static Result index() throws Exception {
@@ -115,31 +113,74 @@ public class Application extends Controller {
         if (json == null) {
             return Application.checkinFailed();
         } else {
-            String name = json.findPath("fid").getTextValue();
-            String truckid = json.findPath("truckid").getTextValue();
+            JsonNode loc = json.findPath("location");
+            long time = System.currentTimeMillis();
+            double[] location = {loc.get(0).asDouble(), loc.get(1).asDouble()};
+            String tid = json.findPath("truckid").getTextValue();
+            System.out.println("!!!!! " + tid);
+            Truck truck= MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "name").field("_id").equal(new ObjectId(tid)).get();
+            User.Checkin checkin = new User.Checkin(time, location, tid, truck.name);
+            System.out.println(checkin.time);
+            // create update query and operation
+            String fid = json.findPath("fid").getTextValue();
+            Query<User> updateQuery = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(new ObjectId(fid));
+            UpdateOperations<User> ops = MorphiaObject.datastore.
+                    createUpdateOperations(User.class).add("checkins", checkin);
+            // update User
+            MorphiaObject.datastore.update(updateQuery, ops);            
+
             ObjectNode ok = Json.newObject();
-            ok.put("name", name);
-            ok.put("truckid", truckid);
+            ok.put("fid", fid);
+            ok.put("tid", tid);
             return ok(ok);
         }
     }
 
+    public static Result getHistoryFb(String fid) {
+        if (authenticated(fid)) {
+            return Application.getHistory(fid);
+        } else {
+            return Application.authFailed();
+        }
+
+    }
+
+    public static Result getHistoryFm(String usr, String pwd) {
+        if (authenticated(usr, pwd)) {
+            return Application.getHistory(usr);
+        } else {
+            return Application.authFailed();
+        }
+
+    }
+
+    private static Result getHistory(String fid) {
+        Gson gson = new Gson();
+        User user = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(new ObjectId(fid)).retrievedFields(false, "pwd", "facebookUser").get();
+        String json = gson.toJson(user);
+        return ok(json);
+    }
+
     public static Result checkinFailed() {
-        return authFailed();
+        return Application.authFailed();
     }
 
     public static Result reviewFailed(String str) {
-        return authFailed();
+        return Application.authFailed();
+    }
+
+    public static Result getHistoryFailed() {
+        return Application.authFailed();
     }
 
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result reviewFb(String truckid, String fid) {
-//        if (authenticated(fid)) {
-//            return Application.review(truckid);
-//        } else {
-//            return Application.authFailed();
-//        }
-        return Application.review(truckid);     // TODO: delete
+        if (authenticated(fid)) {
+            return Application.review(truckid);
+        } else {
+            return Application.authFailed();
+        }
+        //        return Application.review(truckid);     // TODO: delete
     }
 
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
@@ -159,7 +200,8 @@ public class Application extends Controller {
             // construct truckid
             ObjectId tid = new ObjectId(truckid);
             // get new average_star and review_count 
-            Truck truck = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "averageStar", "reviewCount").field("_id").equal(tid).get();
+            Truck truck = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "reviewCount", "averageStar").field("_id").equal(tid).get();
+            System.out.println(truck.toString());
             int star = json.findPath("star").asInt();
             double average_star = (truck.averageStar * truck.reviewCount + star) 
                     / (truck.reviewCount + 1);
@@ -168,13 +210,27 @@ public class Application extends Controller {
             String name = json.findPath("name").getTextValue();
             String comment = json.findPath("comment").getTextValue();
             String entree = json.findPath("entree").getTextValue();
-            Truck.Review review = new Truck().new Review(fid, name, star, comment, entree);
-            // create update query and operation
-            Query<Truck> updateQuery = MorphiaObject.datastore.createQuery(Truck.class).field("_id").equal(tid);
-            UpdateOperations<Truck> ops = MorphiaObject.datastore.
+            Truck.Review review = new Truck.Review(fid, name, star, comment, entree);
+            // create update query and operation for truck
+            Query<Truck> qTruck = MorphiaObject.datastore.createQuery(Truck.class).field("_id").equal(tid);
+            UpdateOperations<Truck> opsTruck = MorphiaObject.datastore.
                     createUpdateOperations(Truck.class).set("averageStar", average_star).inc("reviewCount").add("reviews", review);
             // update truck
-            MorphiaObject.datastore.update(updateQuery, ops);            
+            MorphiaObject.datastore.update(qTruck, opsTruck);
+            // create update query and operation for user
+            Query<User> qUser = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(new ObjectId(fid));
+            List<User.Checkin> checkins = qUser.get().checkins;
+            System.out.println(checkins);
+            for (User.Checkin c : checkins) {
+                if (truckid.equals(c.tid) && c.reviewed == false) {
+                    //                    System.out.println("set reviewed to true");
+                    c.reviewed = true;
+                }// else System.out.println("Fuck :-)");
+            }
+            UpdateOperations<User> opsUser = MorphiaObject.datastore.
+                    createUpdateOperations(User.class).set("checkins", checkins);
+            // update User
+            MorphiaObject.datastore.update(qUser, opsUser); 
             return ok();
         }
 
@@ -188,7 +244,7 @@ public class Application extends Controller {
 
     private static boolean authenticated(String fid) {
         if (fid == null) return false;
-        User user = MorphiaObject.datastore.get(User.class, fid);
+        User user = MorphiaObject.datastore.get(User.class, new ObjectId(fid));
         return user != null;
     }
 

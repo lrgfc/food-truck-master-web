@@ -17,13 +17,14 @@ public class Global extends GlobalSettings {
 		super.beforeStart(arg0);
 		Logger.debug("** onStart **"); 
 		try {
-			// MorphiaObject.mongo = new Mongo("127.0.0.1", 27017);
+//			 MorphiaObject.mongo = new Mongo("127.0.0.1", 27017);
 			MorphiaObject.mongo = new Mongo(new MongoURI("mongodb://root:root@linus.mongohq.com:10094/foodtruck"));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 		MorphiaObject.morphia = new Morphia();
-		MorphiaObject.datastore = MorphiaObject.morphia.createDatastore(MorphiaObject.mongo, "foodtruck", "root", new String("root").toCharArray());
+                MorphiaObject.datastore = MorphiaObject.morphia.createDatastore(MorphiaObject.mongo, "foodtruck", "root", new String("root").toCharArray());
+//                MorphiaObject.datastore = MorphiaObject.morphia.createDatastore(MorphiaObject.mongo, "foodtruck");
 		MorphiaObject.datastore.ensureIndexes();   
 		MorphiaObject.datastore.ensureCaps();  
 

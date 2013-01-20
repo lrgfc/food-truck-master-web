@@ -17,6 +17,11 @@ POST	/checkin/:fid				controllers.Application.checkinFb(fid: String)
 POST	/checkin/:usr/:pwd			controllers.Application.checkinFm(usr: String, pwd: String)
 POST    /checkin                    controllers.Application.checkinFailed()
 
+# history
+GET     /history/:fid               controllers.Application.getHistoryFb(fid: String)
+GET     /history/:usr/:pwd          controllers.Application.getHistoryFm(usr: String, pwd: String)
+GET     /history                    controllers.Application.getHistoryFailed()
+
 # POST review
 POST    /review/:truckid/:fid       controllers.Application.reviewFb(truckid: String, fid: String)
 POST    /review/:truckid/:usr/:pwd  controllers.Application.reviewFm(truckid: String, usr: String, pwd: String)

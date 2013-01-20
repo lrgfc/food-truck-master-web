@@ -1,19 +1,12 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.bson.types.ObjectId;
-
-import play.Logger;
 import play.data.validation.Constraints.Required;
 
 
 import com.google.code.morphia.annotations.*;
-
-
-import controllers.MorphiaObject;
 
 @Entity("trucks")
 public class Truck {
@@ -33,7 +26,8 @@ public class Truck {
 	public List<Review> reviews = new ArrayList<Review>();
 	
 	@Embedded
-	public class Review {
+	public static class Review {
+	        public Review(){};
 	        public Review (String fid, String name, 
 	                int star, String comments, String entree){
 	            this.fid = fid;
