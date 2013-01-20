@@ -1,6 +1,7 @@
 package controllers;
 
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
@@ -27,11 +28,21 @@ public class Application extends Controller {
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result getTrucks() {		 
         Gson gson = new Gson();
-        List<Truck> groups = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(false, "reviews").limit(10).asList();
+        List<Truck> groups = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(false,"reviews").limit(10).asList();
         String json = gson.toJson(groups);
-
-        return ok(json);
+        String output = removeReviews(json);
+//        System.out.println(y);
+        return ok(output);
     }
+
+
+	private static String removeReviews(String json) {
+		String input = json;
+        Pattern r = Pattern.compile(",\"reviews\":\\[(\\{.*\\})*\\]\\}");
+        Matcher m = r.matcher(input);
+        String output = m.replaceAll("}");
+		return output;
+	}
 
 
         public static Result getTrucksByType(String genre) {
@@ -41,7 +52,8 @@ public class Application extends Controller {
 //            List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
 //                            .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
             String json = gson.toJson(truck);
-            return ok(json);
+            String output = removeReviews(json);
+            return ok(output);
     }
     
     public static Result getNearByTrucks(String lon, String lat) {
@@ -51,7 +63,8 @@ public class Application extends Controller {
                         .near(Double.parseDouble(lon), Double.parseDouble(lat), 0.0001)
                         .limit(5).retrievedFields(false, "reviews").asList();
         String json = gson.toJson(truck);
-        return ok(json);
+        String output = removeReviews(json);
+        return ok(output);
     }
 
     public static Result getTopTrucks(String rank) {   
@@ -59,7 +72,8 @@ public class Application extends Controller {
         List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
                         .order("-averageStar").retrievedFields(false, "reviews").limit(Integer.parseInt(rank)).asList();
         String json = gson.toJson(truck);
-        return ok(json);
+        String output = removeReviews(json);
+        return ok(output);
     } 
 
 
