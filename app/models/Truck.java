@@ -29,18 +29,18 @@ public class Truck {
 	public static class Review {
 	        public Review(){};
 	        public Review (String fid, String name, 
-	                int star, String comments, String entree){
-	            this.fid = fid;
+	                int star, String comments){
+	            this.timestamp = System.currentTimeMillis();
+	            this.userId = fid;
 	            this.name = name;
 	            this.star = star;
 	            this.comments = comments;
-	            this.entree = entree;
 	        }
-		public String fid;
+	        public long timestamp;
+		public String userId;
 		public String name;
 		public int star;
 		public String comments;
-		public String entree;
 	}
 	
 }

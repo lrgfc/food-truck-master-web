@@ -134,22 +134,20 @@ public class Application extends Controller {
             long time = System.currentTimeMillis();
             double[] location = {loc.get(0).asDouble(), loc.get(1).asDouble()};
             String tid = json.findPath("truckid").getTextValue();
-            System.out.println("!!!!! " + tid);
+            System.out.println("!!!!!checkin: " + tid);
             Truck truck= MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "name").field("_id").equal(new ObjectId(tid)).get();
             User.Checkin checkin = new User.Checkin(time, location, tid, truck.name);
             System.out.println(checkin.time);
             // create update query and operation
             String fid = json.findPath("fid").getTextValue();
-            Query<User> updateQuery = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(new ObjectId(fid));
+            Query<User> updateQuery = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(fid);
             UpdateOperations<User> ops = MorphiaObject.datastore.
                     createUpdateOperations(User.class).add("checkins", checkin);
             // update User
             MorphiaObject.datastore.update(updateQuery, ops);            
 
-            ObjectNode ok = Json.newObject();
-            ok.put("fid", fid);
-            ok.put("tid", tid);
-            return ok(ok);
+            return okResponse();
+
         }
     }
 
@@ -173,7 +171,7 @@ public class Application extends Controller {
 
     private static Result getHistory(String fid) {
         Gson gson = new Gson();
-        User user = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(new ObjectId(fid)).retrievedFields(false, "pwd", "facebookUser").get();
+        User user = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(fid).retrievedFields(false, "pwd", "facebookUser").get();
         String json = gson.toJson(user);
         return ok(json);
     }
@@ -223,11 +221,11 @@ public class Application extends Controller {
             double average_star = (truck.averageStar * truck.reviewCount + star) 
                     / (truck.reviewCount + 1);
             // construct new review
-            String fid = json.findPath("fid").getTextValue();
+            String fid = json.findPath("userId").getTextValue();
             String name = json.findPath("name").getTextValue();
-            String comment = json.findPath("comment").getTextValue();
-            String entree = json.findPath("entree").getTextValue();
-            Truck.Review review = new Truck.Review(fid, name, star, comment, entree);
+            String comment = json.findPath("comments").getTextValue();
+//            String entree = json.findPath("entree").getTextValue();
+            Truck.Review review = new Truck.Review(fid, name, star, comment);
             // create update query and operation for truck
             Query<Truck> qTruck = MorphiaObject.datastore.createQuery(Truck.class).field("_id").equal(tid);
             UpdateOperations<Truck> opsTruck = MorphiaObject.datastore.
@@ -235,7 +233,8 @@ public class Application extends Controller {
             // update truck
             MorphiaObject.datastore.update(qTruck, opsTruck);
             // create update query and operation for user
-            Query<User> qUser = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(new ObjectId(fid));
+            Query<User> qUser = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(fid);
+            System.out.println("!!!!!! " + fid);
             List<User.Checkin> checkins = qUser.get().checkins;
             System.out.println(checkins);
             for (User.Checkin c : checkins) {
@@ -248,7 +247,7 @@ public class Application extends Controller {
                     createUpdateOperations(User.class).set("checkins", checkins);
             // update User
             MorphiaObject.datastore.update(qUser, opsUser); 
-            return ok();
+            return okResponse();
         }
 
     }
@@ -261,13 +260,13 @@ public class Application extends Controller {
 
     private static boolean authenticated(String fid) {
         if (fid == null) return false;
-        User user = MorphiaObject.datastore.get(User.class, new ObjectId(fid));
+        User user = MorphiaObject.datastore.get(User.class, fid);
         return user != null;
     }
 
     private static boolean authenticated(String usr, String pwd) {
         if (usr == null || pwd == null) return false;
-        User user = MorphiaObject.datastore.get(User.class, new ObjectId(usr));
+        User user = MorphiaObject.datastore.get(User.class, usr);
         if (user == null) return false;
         else return pwd.equals(user.pwd);
     }
@@ -308,10 +307,18 @@ public class Application extends Controller {
             user.id = email;
             user.facebookUser = facebookUser;
             MorphiaObject.datastore.save(user);
-            ObjectNode ok = Json.newObject();
-            ok.put("response", "OK");
-            return ok(ok);
+            return okResponse();
         }
+    }
+
+
+    /**
+     * @return
+     */
+    public static Result okResponse() {
+        ObjectNode ok = Json.newObject();
+        ok.put("response", "OK");
+        return ok(ok);
     }
 
 }
