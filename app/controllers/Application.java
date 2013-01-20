@@ -74,37 +74,12 @@ public class Application extends Controller {
         return ok(output);
     } 
 
-
     public static Result getTruckById(String truckid) {
         Gson gson = new Gson();
         Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id")
                 .equal(new ObjectId(truckid)).get();
         String json = gson.toJson(truck);
         return ok(json);
-    }
-
-    public static Result index() throws Exception {
-        // redirect to the "group Result
-        return redirect(routes.Application.group());
-    }
-
-    public static Result group() {
-        return ok(views.html.index.render(Group.all(), groupForm));
-    }
-
-    public static Result newGroup() {
-        Form<Group> filledForm = groupForm.bindFromRequest();
-        if(filledForm.hasErrors()) {
-            return badRequest(views.html.index.render(Group.all(), filledForm));
-        } else {
-            Group.create(filledForm.get());
-            return redirect(routes.Application.group());  
-        }
-    }
-
-    public static Result deleteGroup(String id) {
-        Group.delete(id);
-        return redirect(routes.Application.group());
     }
 
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
@@ -134,10 +109,10 @@ public class Application extends Controller {
             long time = System.currentTimeMillis();
             double[] location = {loc.get(0).asDouble(), loc.get(1).asDouble()};
             String tid = json.findPath("truckid").getTextValue();
-            System.out.println("!!!!!checkin: " + tid);
+//            System.out.println("!!!!!checkin: " + tid);
             Truck truck= MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "name").field("_id").equal(new ObjectId(tid)).get();
             User.Checkin checkin = new User.Checkin(time, location, tid, truck.name);
-            System.out.println(checkin.time);
+//            System.out.println(checkin.time);
             // create update query and operation
             String fid = json.findPath("fid").getTextValue();
             Query<User> updateQuery = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(fid);
@@ -216,7 +191,7 @@ public class Application extends Controller {
             ObjectId tid = new ObjectId(truckid);
             // get new average_star and review_count 
             Truck truck = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "reviewCount", "averageStar").field("_id").equal(tid).get();
-            System.out.println(truck.toString());
+//            System.out.println(truck.toString());
             int star = json.findPath("star").asInt();
             double average_star = (truck.averageStar * truck.reviewCount + star) 
                     / (truck.reviewCount + 1);
@@ -224,7 +199,7 @@ public class Application extends Controller {
             String fid = json.findPath("userId").getTextValue();
             String name = json.findPath("name").getTextValue();
             String comment = json.findPath("comments").getTextValue();
-//            String entree = json.findPath("entree").getTextValue();
+            //            String entree = json.findPath("entree").getTextValue();
             Truck.Review review = new Truck.Review(fid, name, star, comment);
             // create update query and operation for truck
             Query<Truck> qTruck = MorphiaObject.datastore.createQuery(Truck.class).field("_id").equal(tid);
@@ -234,9 +209,9 @@ public class Application extends Controller {
             MorphiaObject.datastore.update(qTruck, opsTruck);
             // create update query and operation for user
             Query<User> qUser = MorphiaObject.datastore.createQuery(User.class).field("_id").equal(fid);
-            System.out.println("!!!!!! " + fid);
+            //            System.out.println("!!!!!! " + fid);
             List<User.Checkin> checkins = qUser.get().checkins;
-            System.out.println(checkins);
+//            System.out.println(checkins);
             for (User.Checkin c : checkins) {
                 if (truckid.equals(c.tid) && c.reviewed == false) {
                     //                    System.out.println("set reviewed to true");
@@ -254,7 +229,7 @@ public class Application extends Controller {
 
     private static Result authFailed() {
         ObjectNode failed = Json.newObject();
-        failed.put("error", "authentication failed");
+        failed.put("response", "authentication failed");
         return badRequest(failed);
     }
 
@@ -270,13 +245,13 @@ public class Application extends Controller {
         if (user == null) return false;
         else return pwd.equals(user.pwd);
     }
-    
+
     private static Result registerFailed() {
         ObjectNode failed = Json.newObject();
         failed.put("response", "Error");
         return badRequest(failed);
     }
-    
+
     private static Result registerDuplicate() {
         ObjectNode failed = Json.newObject();
         failed.put("response", "Account already exists");
@@ -311,10 +286,6 @@ public class Application extends Controller {
         }
     }
 
-
-    /**
-     * @return
-     */
     public static Result okResponse() {
         ObjectNode ok = Json.newObject();
         ok.put("response", "OK");

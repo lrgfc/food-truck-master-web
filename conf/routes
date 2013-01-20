@@ -2,8 +2,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET     /                           controllers.Application.index()
 
 # Trucks
 GET     /trucks                     controllers.Application.getTrucks()
@@ -30,10 +28,6 @@ POST    /review/:truckid/:fid       controllers.Application.reviewFb(truckid: St
 POST    /review/:truckid/:usr/:pwd  controllers.Application.reviewFm(truckid: String, usr: String, pwd: String)
 POST    /review/:truckid            controllers.Application.reviewFailed(truckid: String)
 
-
-GET     /groups                     controllers.Application.group()
-POST    /groups                     controllers.Application.newGroup()
-POST    /groups/:id/delete          controllers.Application.deleteGroup(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
