@@ -12,6 +12,9 @@ GET     /trucks/nearby/:lon/:lat    controllers.Application.getNearByTrucks(lon:
 GET     /trucks/top/:rank           controllers.Application.getTopTrucks(rank: String)
 GET     /truck/:truckid             controllers.Application.getTruckById(truckid: String)
 
+# register
+POST    /register                   controllers.Application.register()
+
 # checkins
 POST	/checkin/:fid				controllers.Application.checkinFb(fid: String)
 POST	/checkin/:usr/:pwd			controllers.Application.checkinFm(usr: String, pwd: String)

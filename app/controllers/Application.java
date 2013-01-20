@@ -1,6 +1,8 @@
 package controllers;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bson.types.ObjectId;
 import org.codehaus.jackson.node.ObjectNode;
@@ -24,19 +26,32 @@ public class Application extends Controller {
     @BodyParser.Of(play.mvc.BodyParser.Json.class)
     public static Result getTrucks() {		 
         Gson gson = new Gson();
-        List<Truck> groups = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(false, "reviews").limit(10).asList();
+        List<Truck> groups = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(false,"reviews").limit(10).asList();
         String json = gson.toJson(groups);
+        String output = removeReviews(json);
+        //        System.out.println(y);
+        return ok(output);
+    }
 
-        return ok(json);
+
+    private static String removeReviews(String json) {
+        String input = json;
+        Pattern r = Pattern.compile(",\"reviews\":\\[(\\{.*\\})*\\]\\}");
+        Matcher m = r.matcher(input);
+        String output = m.replaceAll("}");
+        return output;
     }
 
 
     public static Result getTrucksByType(String genre) {
         Gson gson = new Gson();
-        List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
-                .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
+        Pattern regexp = Pattern.compile(genre);
+        List<Truck> truck = MorphiaObject.datastore.createQuery(Truck.class).filter("genre", regexp).retrievedFields(false, "reviews").asList();
+        //            List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
+        //                            .field("genre").equal(genre).retrievedFields(false, "reviews").asList();
         String json = gson.toJson(truck);
-        return ok(json);
+        String output = removeReviews(json);
+        return ok(output);
     }
 
     public static Result getNearByTrucks(String lon, String lat) {
@@ -46,7 +61,8 @@ public class Application extends Controller {
                 .near(Double.parseDouble(lon), Double.parseDouble(lat), 0.0001)
                 .limit(5).retrievedFields(false, "reviews").asList();
         String json = gson.toJson(truck);
-        return ok(json);
+        String output = removeReviews(json);
+        return ok(output);
     }
 
     public static Result getTopTrucks(String rank) {   
@@ -54,7 +70,8 @@ public class Application extends Controller {
         List<Truck> truck = MorphiaObject.datastore.find(Truck.class)
                 .order("-averageStar").retrievedFields(false, "reviews").limit(Integer.parseInt(rank)).asList();
         String json = gson.toJson(truck);
-        return ok(json);
+        String output = removeReviews(json);
+        return ok(output);
     } 
 
 
@@ -250,9 +267,51 @@ public class Application extends Controller {
 
     private static boolean authenticated(String usr, String pwd) {
         if (usr == null || pwd == null) return false;
-        User user = MorphiaObject.datastore.get(User.class, usr);
+        User user = MorphiaObject.datastore.get(User.class, new ObjectId(usr));
         if (user == null) return false;
         else return pwd.equals(user.pwd);
+    }
+    
+    private static Result registerFailed() {
+        ObjectNode failed = Json.newObject();
+        failed.put("response", "Error");
+        return badRequest(failed);
+    }
+    
+    private static Result registerDuplicate() {
+        ObjectNode failed = Json.newObject();
+        failed.put("response", "Account already exists");
+        return badRequest(failed);
+    }
+
+    public static Result register() {
+        JsonNode json = request().body().asJson();
+        if (json == null) {
+            return Application.registerFailed();
+        } else {
+            User user = new User();
+            String email = json.findPath("email").getTextValue();
+            String name = json.findPath("name").getTextValue();
+            String pwd = json.findPath("pwd").getTextValue();
+            boolean facebookUser = json.findPath("facebookUser").asBoolean();
+            if (!facebookUser) {
+                if (email == null || name == null || pwd == null) {
+                    return Application.registerFailed();
+                } else {
+                    if (Application.authenticated(email, pwd))
+                        return Application.registerDuplicate();
+                    user.email = email;
+                    user.name = name;
+                    user.pwd = pwd;
+                }
+            }
+            user.id = email;
+            user.facebookUser = facebookUser;
+            MorphiaObject.datastore.save(user);
+            ObjectNode ok = Json.newObject();
+            ok.put("response", "OK");
+            return ok(ok);
+        }
     }
 
 }
