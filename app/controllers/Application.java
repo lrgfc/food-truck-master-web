@@ -1,5 +1,7 @@
 package controllers;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,6 +14,7 @@ import com.google.code.morphia.query.UpdateOperations;
 import com.google.gson.Gson;
 
 import models.*;
+import models.Truck.Review;
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -78,6 +81,15 @@ public class Application extends Controller {
         Gson gson = new Gson();
         Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id")
                 .equal(new ObjectId(truckid)).order("-average_star").get();
+        Collections.sort(truck.reviews, new Comparator<Truck.Review>(){
+            @Override
+            public int compare(Review o1, Review o2) {
+                if (o1.timestamp < o2.timestamp) return 1;
+                else if (o1.timestamp == o2.timestamp) return 0;
+                else return -1;
+            }
+            
+        });
         String json = gson.toJson(truck);
         return ok(json);
     }
