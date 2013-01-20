@@ -77,7 +77,7 @@ public class Application extends Controller {
     public static Result getTruckById(String truckid) {
         Gson gson = new Gson();
         Truck truck = MorphiaObject.datastore.find(Truck.class).field("_id")
-                .equal(new ObjectId(truckid)).get();
+                .equal(new ObjectId(truckid)).order("-average_star").get();
         String json = gson.toJson(truck);
         return ok(json);
     }
