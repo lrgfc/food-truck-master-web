@@ -155,7 +155,7 @@ public class Application extends Controller {
             // construct truckid
             ObjectId tid = new ObjectId(truckid);
             // get new average_star and review_count 
-            Truck truck = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "average_star", "review_count").field("_id").equal(tid).get();
+            Truck truck = MorphiaObject.datastore.createQuery(Truck.class).retrievedFields(true, "averageStar", "reviewCount").field("_id").equal(tid).get();
             int star = json.findPath("star").asInt();
             double average_star = (truck.averageStar * truck.reviewCount + star) 
                     / (truck.reviewCount + 1);
@@ -164,11 +164,11 @@ public class Application extends Controller {
             String name = json.findPath("name").getTextValue();
             String comment = json.findPath("comment").getTextValue();
             String entree = json.findPath("entree").getTextValue();
-            Truck.Review review = truck.new Review(fid, name, star, comment, entree);
+            Truck.Review review = new Truck().new Review(fid, name, star, comment, entree);
             // create update query and operation
             Query<Truck> updateQuery = MorphiaObject.datastore.createQuery(Truck.class).field("_id").equal(tid);
             UpdateOperations<Truck> ops = MorphiaObject.datastore.
-                    createUpdateOperations(Truck.class).set("average_star", average_star).inc("review_count").add("reviews", review);
+                    createUpdateOperations(Truck.class).set("averageStar", average_star).inc("reviewCount").add("reviews", review);
             // update truck
             MorphiaObject.datastore.update(updateQuery, ops);            
             return ok();
